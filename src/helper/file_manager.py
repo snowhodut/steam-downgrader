@@ -51,4 +51,4 @@ class FileManager():
 
         # Check if the rollback folder exists
         # src/database/container/는 더 이상 필요 없으므로 제거합니다.
-        self.ensure_directory("src/util/rollback/")
+        self.ensure_directory("src/util/steam_rollback_tool/")

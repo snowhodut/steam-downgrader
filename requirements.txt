@@ -2,3 +2,4 @@ colorama
 PyYAML
 requests
 pyuac
+pywin32
