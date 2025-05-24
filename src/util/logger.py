@@ -1,67 +1,37 @@
-import logging, pyuac
-import os
 import time
-from src.util.logger import Logger
-from src.helper.config import Config
-from ssfn import SSFNHandler 
-from src.util.rollback import SteamRollback 
+from sys import exit
+from os import system, name
+from datetime import datetime
+from colorama import Fore, Style
 
+class Logger:
 
-# 로깅 시스템 설정
-logging.basicConfig(handlers=[logging.FileHandler('ssfntool.log', 'w+', 'utf-8')], level=logging.ERROR, format='%(asctime)s: %(message)s')
+    def __init__(self):
+        # Set the colors for the logs
+        self.log_types = {
+            "INFO": Fore.CYAN,
+            "OK": Fore.GREEN,
+            "WARNING": Fore.YELLOW,
+            "UPDATER": Fore.YELLOW, # Updater 기능은 제거했으므로, 이 로그 타입도 제거하거나 유지해도 무방합니다.
+            "ROLLBACK": Fore.YELLOW,
+            "SLEEP": Fore.YELLOW,
+            "ERROR": Fore.RED,
+            "INPUT": Fore.BLUE, # Input 관련 기능도 대부분 제거되었으므로, 이 로그 타입도 제거하거나 유지해도 무방합니다.
+        }
 
-class Main:
-    def __init__(self) -> None:
-        self.logger = Logger()
-        self.config = Config()
-        self.ssfn_handler = SSFNHandler()
-        self.steam_rollback = SteamRollback()
+    # Clear console function
+    def clear(self):
+        system("cls" if name in ("nt", "dos") else "clear")
 
-    def start(self):
-        # self.logger.print_logo() # <-- 이 줄을 제거하거나 주석 처리합니다.
-        self.logger.log("INFO", f"SSFN 파일 교체 및 Steam Rollback 도구를 시작합니다. {self.config.username}님 환영합니다!")
-
-        # --- 1. SSFN 파일 교체 로직 ---
-        self.logger.log("INFO", "로컬 SSFN 파일 교체 작업을 시작합니다...")
-
-        YOUR_SSFN_FILE_NAME = "YOUR_SSFN_FILE_NAME_HERE" # <-- 이 부분을 당신의 실제 SSFN 파일 이름으로 변경하세요!
-        current_script_dir = os.path.dirname(os.path.abspath(__file__))
-        local_ssfn_filepath = os.path.join(current_script_dir, YOUR_SSFN_FILE_NAME)
-
-        steam_installation_path = self.config.get_steam_path()
-
-        if not steam_installation_path or not os.path.isdir(steam_installation_path):
-            self.logger.log("ERROR", "Steam 설치 경로가 유효하지 않거나 설정되지 않았습니다. 'steam_installation_path' 변수를 올바르게 설정하세요.")
-            self.logger.exit_program()
-
-        self.logger.log("INFO", f"로컬 SSFN 파일 소스 경로: {local_ssfn_filepath}")
-        self.logger.log("INFO", f"Steam 대상 디렉토리 경로: {steam_installation_path}")
-
-        ssfn_copy_success = self.ssfn_handler.use_local_ssfn(local_ssfn_filepath, steam_installation_path)
-
-        if not ssfn_copy_success:
-            self.logger.log("ERROR", "SSFN 파일 교체에 실패했습니다. Steam 관련 작업에 문제가 발생할 수 있습니다. 프로그램을 종료합니다.")
-            self.logger.exit_program()
-        else:
-            self.logger.log("INFO", "SSFN 파일이 성공적으로 Steam 디렉토리로 교체되었습니다!")
-        # --- SSFN 파일 교체 로직 끝 ---
-
+    def exit_program(self):
+        self.log("INFO", "Bye!")
         time.sleep(2)
-        self.logger.log("INFO", "Steam 클라이언트 롤백 작업을 시작합니다...")
-
-        # --- 2. Steam Rollback 로직 ---
-        self.steam_rollback.execute_rollback()
-        self.logger.log("INFO", "Steam 롤백 작업이 완료되었습니다. Steam 클라이언트가 시작될 것입니다.")
-        # --- Steam Rollback 로직 끝 ---
-
-        self.logger.log("INFO", "모든 작업이 완료되었습니다.")
+        exit()
 
 
-if __name__ == "__main__":
-    if not pyuac.isUserAdmin():
-        print("관리자 권한으로 다시 시작합니다! 이 창은 닫으셔도 됩니다.")
-        pyuac.runAsAdmin()
-    else:
-        app = Main()
-        app.start()
-        input("모든 작업이 완료되었습니다. 창을 닫으려면 Enter를 누르세요...")
+    # Function to log messages to the console
+    def log(self, type, message):
+        color = self.log_types.get(type, Fore.WHITE) # 정의되지 않은 타입에 대비하여 기본 색상 설정
+        now = datetime.now()
+        current_time = now.strftime("%d/%m/%Y - %H:%M:%S")
+        print(f"{Style.DIM}{current_time} - {Style.RESET_ALL}{Style.BRIGHT}{color}[{Style.RESET_ALL}{type}{Style.BRIGHT}{color}] {Style.RESET_ALL}{Style.BRIGHT}{Fore.WHITE}{message}")
