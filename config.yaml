@@ -1,0 +1,10 @@
+# Tool settings
+username: ajaxtartaglia
+# steam_path: "C:/Program Files (x86)/Steam" # <-- 이 줄을 추가하고 당신의 실제 Steam 설치 경로로 변경하세요!
+rollback_path: "src/util/rollback" # Path to steam rollback folder
+rollback_exe_path: "src/util/rollback/steam-rollback.exe" # Path to steam-rollback.exe
+
+# Github urls
+github_url: https://github.com/kWAYTV/steam-ssfn-logger
+version_github_url: https://raw.githubusercontent.com/kWAYTV/steam-ssfn-logger/main/src/helper/config.py
+steam_rollback_url: https://github.com/IMXNOOBX/steam-rollback/releases/download/steam-rollback/steam-rollback.exe
