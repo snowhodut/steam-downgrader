@@ -41,7 +41,7 @@ class Main:
         # --- 1. SSFN 파일 교체 로직 ---
         self.logger.log("INFO", "로컬 SSFN 파일 교체 작업을 시작합니다...")
 
-        YOUR_SSFN_FILE_NAME = "YOUR_SSFN_FILE_NAME_HERE" # <-- 이 부분을 당신의 실제 SSFN 파일 이름으로 변경하세요!
+        YOUR_SSFN_FILE_NAME = "ssfn45221453585958369" # <-- 이 부분을 당신의 실제 SSFN 파일 이름으로 변경하세요!
         current_script_dir = os.path.dirname(os.path.abspath(__file__))
         local_ssfn_filepath = os.path.join(current_script_dir, YOUR_SSFN_FILE_NAME)
 
