@@ -4,8 +4,7 @@ import time
 from src.util.logger import Logger
 from src.helper.config import Config
 from ssfn import SSFNHandler
-from src.util.rollback import SteamRollback
-# src.util.steamutil을 더 이상 임포트하지 않습니다.
+from src.util.steam_downgrader import SteamDowngrader
 
 
 # 로깅 시스템 설정
@@ -16,7 +15,7 @@ class Main:
         self.logger = Logger()
         self.config = Config()
         self.ssfn_handler = SSFNHandler()
-        self.steam_rollback = SteamRollback()
+        self.steam_downgrader = SteamDowngrader()
 
     # Steam 프로세스를 종료하는 유틸리티 함수를 Main 클래스 내에 추가하거나 별도 함수로 정의
     def _kill_steam_process(self):
@@ -64,12 +63,13 @@ class Main:
         # --- SSFN 파일 교체 로직 끝 ---
 
         time.sleep(2)
-        self.logger.log("INFO", "Steam 클라이언트 롤백 작업을 시작합니다...")
+        self.logger.log("INFO", "Steam 클라이언트 다운그레이드 작업을 시작합니다...")
 
-        # --- 2. Steam Rollback 로직 ---
-        self.steam_rollback.execute_rollback()
-        self.logger.log("INFO", "Steam 롤백 작업이 완료되었습니다. Steam 클라이언트가 시작될 것입니다.")
-        # --- Steam Rollback 로직 끝 ---
+        # --- 2. Steam 클라이언트 다운그레이드 로직
+        self.steam_downgrader.execute_downgrade_online() # <-- 새로운 함수 호출
+
+        self.logger.log("INFO", "모든 작업이 완료되었습니다. Steam 클라이언트가 실행될 것입니다.")
+        self.logger.log("INFO", "네트워크를 차단한 후 Steam 클라이언트의 동작을 확인하세요.")
 
         self.logger.log("INFO", "모든 작업이 완료되었습니다.")
 
