@@ -100,58 +100,67 @@ class SteamDowngrader: # 클래스 이름 변경
             # 이 오류가 발생해도 프로그램 종료 대신 경고만 출력하여 다음 단계 진행 시도
             self.logger.log("WARNING", "loginusers.vdf 수정에 실패했으나, Steam 실행은 시도합니다.")
 
-    def execute_downgrade_online(self):
-        self.logger.log("ROLLBACK", "Steam 클라이언트 온라인 다운그레이드 시작...")
+    def execute_downgrader_online(self): # 함수 이름 변경 (오타 수정)
+        self.logger.log("ROLLBACK", "Steam 클라이언트 온라인 다운그레이드 시작 (파일 다운로드 단계)...")
 
-        # 1. Steam 강제 종료
+        # 1. Steam 강제 종료 (시작 전 혹시 모를 실행 중인 Steam 종료)
         self._kill_steam_process()
         time.sleep(2) # 종료 후 잠시 대기
 
-        # 2. -forcesteamupdate -forcepackagedownload 명령어로 다운그레이드 실행
+        # 2. web.archive.org를 통해 구 버전 파일 다운로드 명령 실행
         wayback_date = self.config.downgrade_wayback_date
         manifest_url_base = f"http://web.archive.org/web/{wayback_date}if_/media.steampowered.com/client"
         
-        # Steam 실행 명령어 구성
+        # Steam 실행 명령어 구성 (구 버전 파일 다운로드 용도)
         # -textmode: GUI 없이 백그라운드에서 업데이트 진행
-        # -exitsteam: 업데이트 완료 후 Steam 자동 종료
-        # -clearbeta: 혹시 모를 베타 잔여 설정 제거 (가이드 언급)
-        # 중요: 명령어가 한 줄 문자열이어야 하고 경로에 공백이 있으면 따옴표로 감싸야 함.
-        launch_command = [
+        # -exitsteam: 업데이트 완료 후 Steam 자동 종료 (매우 중요)
+        launch_command_download = [
             f'"{self.steam_exe_path}"',
             "-forcesteamupdate",
             "-forcepackagedownload",
             f"-overridepackageurl {manifest_url_base}",
             "-textmode",
-            "-exitsteam",
-            "-clearbeta" # 가이드에 따라 추가
+            "-exitsteam", # 다운로드 완료 후 Steam이 스스로 종료되도록 함
+            "-clearbeta"
         ]
         
-        self.logger.log("ROLLBACK", f"Steam 다운그레이드 명령어 실행 중: {' '.join(launch_command)}")
+        self.logger.log("ROLLBACK", f"Steam 구 버전 파일 다운로드 실행 중: {' '.join(launch_command_download)}")
+        self.logger.log("WARNING", "이 단계에서 Steam이 자동으로 백그라운드에서 실행될 수 있으며, 완료 후 종료됩니다.")
+        
         try:
             # subprocess.run을 사용하여 외부 프로세스 실행 및 완료 대기
-            # shell=True는 문자열 명령어를 쉘로 실행. 따옴표 처리에 주의.
-            subprocess.run(' '.join(launch_command), shell=True, check=True, creationflags=subprocess.CREATE_NO_WINDOW) # 창 안 뜨게 추가
-            self.logger.log("ROLLBACK", "Steam 다운그레이드 프로세스 실행 완료. Steam이 자동 종료되었을 것입니다.")
-            time.sleep(5) # 다운그레이드 프로세스 완료 및 종료 대기
+            # 이 단계에서는 네트워크가 연결되어 있어야 합니다.
+            subprocess.run(' '.join(launch_command_download), shell=True, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            self.logger.log("ROLLBACK", "Steam 구 버전 파일 다운로드 프로세스 완료. Steam이 자동 종료되었을 것입니다.")
+            time.sleep(5) # 다운로드 프로세스 완료 및 종료 대기 (충분히 대기)
 
         except subprocess.CalledProcessError as e:
-            self.logger.log("ERROR", f"Steam 다운그레이드 실행 실패. Stderr: {e.stderr.strip()}")
+            self.logger.log("ERROR", f"Steam 구 버전 파일 다운로드 실행 실패. Stderr: {e.stderr.strip()}")
             self.logger.log("ERROR", "가이드: 'Steam이 레지스트리 경로 쓰기 불가 다이얼로그를 표시했다면, Repair를 클릭하세요.'")
             self.logger.exit_program()
         except Exception as e:
-            self.logger.log("ERROR", f"Steam 다운그레이드 실행 중 예상치 못한 오류 발생: {e}")
+            self.logger.log("ERROR", f"Steam 구 버전 파일 다운로드 중 예상치 못한 오류 발생: {e}")
             self.logger.exit_program()
 
-        # 3. steam.cfg 파일 생성 (업데이트 방지)
+        # 3. Steam 강제 종료 (다운로드 후 혹시 모를 잔여 프로세스 정리)
+        self._kill_steam_process()
+        time.sleep(2) # 종료 후 잠시 대기
+
+        # --- 이 지점에서 사용자에게 네트워크를 끊으라고 명확히 안내하고 대기 ---
+        self.logger.log("INFO", "=== 다음 단계 진행 전 수동 작업 필요 ===")
+        self.logger.log("WARNING", "지금 바로 가상 머신의 **네트워크 연결을 완전히 차단**하세요!")
+        self.logger.log("WARNING", "네트워크 차단 후 이 프롬프트에 **Enter**를 눌러 다음 단계로 진행하세요.")
+        input("네트워크 차단 후 Enter를 눌러주세요...") # 사용자 입력 대기
+
+        # 4. steam.cfg 파일 생성 (업데이트 방지)
         self._create_steam_cfg()
 
-        # 4. loginusers.vdf 수정 (오프라인 로그인 강제)
+        # 5. loginusers.vdf 수정 (오프라인 로그인 강제)
         self._edit_loginusers_vdf_for_offline()
 
-        # 5. 다운그레이드된 Steam 클라이언트 실행 시도
-        self.logger.log("INFO", "다운그레이드된 Steam 클라이언트 실행 시도 중...")
-        # -vgui 옵션을 추가하여 구형 UI 강제
-        # 네트워크 차단은 수동 또는 외부 스크립트로 진행해야 함
+        # 6. 다운그레이드된 Steam 클라이언트 실행 시도 (오프라인 진입 시도)
+        self.logger.log("INFO", "다운그레이드된 Steam 클라이언트 실행 시도 중 (오프라인 모드 진입)..")
+        # -vgui 옵션을 추가하여 구형 UI 강제 (선택 사항이지만 도움이 될 수 있음)
         final_launch_command = [
             f'"{self.steam_exe_path}"',
             "-vgui" # 구형 UI 강제
@@ -159,11 +168,10 @@ class SteamDowngrader: # 클래스 이름 변경
         
         try:
             # subprocess.Popen을 사용하여 Steam을 비동기적으로 실행하고 프로그램은 계속 진행
-            # 이 시점에서 사용자가 수동으로 네트워크를 차단해야 합니다.
-            subprocess.Popen(' '.join(final_launch_command), shell=True, creationflags=subprocess.CREATE_NO_WINDOW) # 창 안 뜨게 추가
-            self.logger.log("OK", "Steam 클라이언트가 실행될 것입니다. 업데이트를 확인하거나 로그인 시도하세요.")
-            self.logger.log("WARNING", "매우 중요: Steam 클라이언트가 시작되는 즉시 네트워크를 완전히 차단해야 업데이트를 피할 수 있습니다.")
-            self.logger.log("WARNING", "네트워크 차단 후, SSFN 파일을 통해 로그인 시도해 보세요.")
+            # 이 시점에서는 네트워크가 차단되어 있어야 합니다.
+            subprocess.Popen(' '.join(final_launch_command), shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            self.logger.log("OK", "Steam 클라이언트가 실행될 것입니다. 오프라인 모드 진입을 확인하세요.")
+            self.logger.log("INFO", "네트워크가 차단된 상태에서 Steam이 성공적으로 실행되었는지 확인하고, SSFN 파일을 통해 로그인 시도해 보세요.")
         except Exception as e:
             self.logger.log("ERROR", f"Steam 클라이언트 실행 실패: {e}")
             self.logger.exit_program()
