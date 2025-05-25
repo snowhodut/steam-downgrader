@@ -1,7 +1,7 @@
 import yaml
 from yaml import SafeLoader
-import os # os 모듈 추가 (경로 존재 여부 확인용)
-from src.steam.reg import SteamReg # SteamReg 클래스를 임포트합니다.
+import os
+from src.steam.reg import SteamReg
 
 class Config():
     def __init__(self):
@@ -12,24 +12,35 @@ class Config():
             self.build_version: str = "1.5"
             self.username: str = self.config["username"]
 
-            # --- 변경된 부분 ---
-            # SteamReg를 사용하여 Steam 경로를 자동으로 감지합니다.
+            # --- Steam 경로 자동 감지 로직 ---
             self.steam_reg = SteamReg()
+            detected_steam_path = None # 이 변수는 임시로 사용하며, 없으면 None으로 설정
             try:
-                # 레지스트리에서 SteamPath를 가져옵니다.
-                self.steam_path: str = self.steam_reg.get_steam_path()
-                # 가져온 경로가 실제로 존재하는 유효한 디렉토리인지 확인합니다.
-                if not os.path.isdir(self.steam_path):
-                    raise ValueError(f"감지된 Steam 경로가 유효하지 않습니다: {self.steam_path}")
-            except Exception as e:
-                # 레지스트리에서 Steam 경로를 찾지 못하거나 유효하지 않은 경우
-                # 사용자에게 config.yaml에 수동으로 입력하도록 안내합니다.
-                print(f"경고: Steam 경로를 자동으로 감지하지 못했습니다. {e}")
-                print("config.yaml 파일의 'steam_path'에 Steam 설치 경로를 수동으로 입력해야 합니다.")
-                # config.yaml에서 steam_path를 fallback으로 읽도록 합니다 (옵션)
-                self.steam_path: str = self.config.get("steam_path")
+                detected_steam_path = self.steam_reg.get_steam_path()
+                if detected_steam_path and not os.path.isdir(detected_steam_path):
+                    detected_steam_path = None # 유효하지 않은 경로면 None으로 처리
+            except Exception:
+                pass # 레지스트리에서 찾지 못하거나 오류 발생 시 무시
+
+            if detected_steam_path:
+                self.steam_path = detected_steam_path
+            else:
+                print(f"경고: Steam 경로를 자동으로 감지하지 못했습니다.")
+                print("config.yaml 파일의 'steam_path'에 Steam 설치 경로를 수동으로 입력하거나, 레지스트리 설정을 확인하세요.")
+                
+                self.steam_path = self.config.get("steam_path") # config.yaml에서 폴백
                 if not self.steam_path or not os.path.isdir(self.steam_path):
                     raise ValueError("config.yaml에서도 유효한 Steam 경로를 찾을 수 없습니다. 경로를 설정해주세요.")
+
+            # --- 이 줄을 추가하세요! ---
+            self.downgrade_wayback_date: str = self.config["downgrade_wayback_date"] # config.yaml에서 날짜를 읽어옵니다.
+
+            # 이전 대화에서 삭제하거나 주석 처리했던 불필요한 키들은 그대로 유지하세요.
+            # self.rollback_path: str = self.config["rollback_path"]
+            # self.rollback_exe_path: str = self.config["rollback_exe_path"]
+            # self.github_url: str = self.config["github_url"]
+            # self.version_github_url: str = self.config["version_github_url"]
+            # self.steam_rollback_url: str = self.config["steam_rollback_url"]
 
         except FileNotFoundError:
             print("ERROR: config.yaml 파일을 찾을 수 없습니다. 프로젝트 루트 폴더에 있는지 확인하세요.")
@@ -37,7 +48,7 @@ class Config():
         except KeyError as e:
             print(f"ERROR: config.yaml 파일에 필수 키가 누락되었습니다: {e}. 파일을 확인하세요.")
             exit()
-        except ValueError as e: # 새로 추가된 Steam 경로 관련 오류
+        except ValueError as e:
             print(f"CRITICAL ERROR: {e}")
             exit()
         except Exception as e:
