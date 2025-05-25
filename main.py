@@ -49,7 +49,7 @@ class Main:
         self.logger.log("INFO", "Steam 클라이언트 다운그레이드 작업을 시작합니다...")
 
         # --- 2. Steam 클라이언트 다운그레이드 로직
-        self.steam_downgrader.execute_downgrade_online() # <-- 새로운 함수 호출
+        self.steam_downgrader.execute_downgrader_online() # <-- 새로운 함수 호출
 
         self.logger.log("INFO", "모든 작업이 완료되었습니다. Steam 클라이언트가 실행될 것입니다.")
         self.logger.log("INFO", "네트워크를 차단한 후 Steam 클라이언트의 동작을 확인하세요.")
