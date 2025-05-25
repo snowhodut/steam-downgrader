@@ -31,14 +31,6 @@ class Config():
                 if not self.steam_path or not os.path.isdir(self.steam_path):
                     raise ValueError("config.yaml에서도 유효한 Steam 경로를 찾을 수 없습니다. 경로를 설정해주세요.")
 
-            # --- 기존 유지 부분 ---
-            self.rollback_path: str = self.config["rollback_path"]
-            self.rollback_exe_path: str = self.config["rollback_exe_path"]
-
-            self.github_url: str = self.config["github_url"]
-            self.version_github_url: str = self.config["version_github_url"]
-            self.steam_rollback_url: str = self.config["steam_rollback_url"]
-
         except FileNotFoundError:
             print("ERROR: config.yaml 파일을 찾을 수 없습니다. 프로젝트 루트 폴더에 있는지 확인하세요.")
             exit()
