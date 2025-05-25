@@ -19,21 +19,23 @@ class SteamDowngrader: # 클래스 이름 변경
 
     def _kill_steam_process(self):
         """실행 중인 Steam 프로세스를 종료합니다."""
+        self.logger.log("INFO", "Steam 프로세스를 종료하는 중...")
         try:
-            self.logger.log("INFO", "Steam 프로세스를 종료하는 중...")
-            # subprocess.run을 사용하여 더 강력하고 오류 확인이 가능한 방식으로 프로세스 종료
-            # `check=True`는 non-zero exit code 시 CalledProcessError 발생.
-            # `capture_output=True`는 표준 출력/오류를 캡처.
-            # `text=True`는 출력을 문자열로 처리.
-            subprocess.run(["taskkill", "/f", "/im", "steam.exe"], check=True, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW) # 창 안 뜨게 추가
-            time.sleep(1) # 종료 완료 대기
-            self.logger.log("INFO", "Steam 프로세스 종료 완료.")
-        except subprocess.CalledProcessError as e:
-            # 프로세스가 실행 중이 아니면 taskkill이 오류를 반환할 수 있으므로 경고로 처리
-            self.logger.log("WARNING", f"Steam 종료 중 경고: {e.stderr.strip()} (Steam이 이미 실행 중이 아니었을 수 있습니다.)")
-            time.sleep(1)
+            # `check=True`를 제거하여 taskkill이 프로세스를 찾지 못해도 오류를 발생시키지 않도록 합니다.
+            # 대신 반환 코드를 확인하여 성공 여부를 판단합니다.
+            result = subprocess.run(["taskkill", "/f", "/im", "steam.exe"], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+
+            if result.returncode == 0: # taskkill이 성공적으로 종료했음을 의미 (프로세스가 있었고 종료됨)
+                self.logger.log("INFO", "Steam 프로세스 종료 완료.")
+            elif "프로세스 \"steam.exe\"을(를) 찾을 수 없습니다." in result.stderr or result.returncode == 128: # taskkill이 프로세스를 찾지 못했을 때의 에러 코드 (Windows)
+                self.logger.log("WARNING", f"Steam 종료 중 경고: Steam 프로세스가 실행 중이 아니었습니다.")
+            else: # 그 외 다른 오류
+                self.logger.log("ERROR", f"Steam 종료 중 알 수 없는 오류 발생 (오류 코드: {result.returncode}): {result.stderr.strip()}")
+
+            time.sleep(1) # 종료 완료 대기 (혹은 다음 작업 시작 전)
+
         except Exception as e:
-            self.logger.log("ERROR", f"Steam 종료 중 예상치 못한 오류 발생: {e} (관리자 권한으로 실행했는지 확인하세요.)")
+            self.logger.log("ERROR", f"Steam 종료 중 예상치 못한 예외 발생: {e} (관리자 권한으로 실행했는지 확인하세요.)")
             time.sleep(1)
 
 

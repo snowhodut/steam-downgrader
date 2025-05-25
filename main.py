@@ -17,19 +17,6 @@ class Main:
         self.ssfn_handler = SSFNHandler()
         self.steam_downgrader = SteamDowngrader()
 
-    # Steam 프로세스를 종료하는 유틸리티 함수를 Main 클래스 내에 추가하거나 별도 함수로 정의
-    def _kill_steam_process(self):
-        try:
-            self.logger.log("INFO", "Steam 프로세스를 종료하는 중...")
-            kill_cmd = "taskkill /f /im steam.exe"
-            os.system(kill_cmd)
-            time.sleep(1)
-            self.logger.log("INFO", "Steam 프로세스 종료 완료.")
-        except Exception as e:
-            self.logger.log("ERROR", f"Steam 종료 중 오류 발생: {e} (관리자 권한으로 실행했는지 확인하세요.)")
-            time.sleep(1)
-
-
     def start(self):
         self.logger.log("INFO", f"SSFN 파일 교체 및 Steam Rollback 도구를 시작합니다. {self.config.username}님 환영합니다!")
 
