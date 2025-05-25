@@ -20,10 +20,6 @@ class Main:
     def start(self):
         self.logger.log("INFO", f"SSFN 파일 교체 및 Steam Rollback 도구를 시작합니다. {self.config.username}님 환영합니다!")
 
-        # SSFN 교체 및 롤백 전에 Steam 프로세스 종료
-        self._kill_steam_process()
-        time.sleep(1) # 종료 후 잠시 대기
-
         # --- 1. SSFN 파일 교체 로직 ---
         self.logger.log("INFO", "로컬 SSFN 파일 교체 작업을 시작합니다...")
 
