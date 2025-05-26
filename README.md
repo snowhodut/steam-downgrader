@@ -250,6 +250,14 @@ Steam 클라이언트를 구버전으로 롤백하려는 시도는 Steam의 무�
 
 결국 공격자가 노리는 건 항상 시스템의 허점이라기보다는, 사용자의 설정 습관일 수도 있다는 점을 체감하게 됐다. 2단계 인증을 설정하고, 자동 로그인 기능을 끄고, 평소에 출처가 불분명한 실행파일을 실행하지 않는 것만으로도 실질적인 보안 수준이 크게 올라갈 수 있다.
 
-## 5. PoC 데모 영상
-`session_probe.py` 실행 결과
+<br>
+
+## 5. `session_probe.py` PoC 데모 영상
 [![Demo](http://img.youtube.com/vi/hgRTmFVzz_w/0.jpg)](https://youtu.be/hgRTmFVzz_w)
+<br>
+[설명] <br>
+`python session_probe.py --install` 명령을 실행하면 시작 프로그램으로 등록된다.
+<br>
+시스템을 재부팅한 뒤, 아무것도 하지 않고 잠시 기다리면 cmd 창이 빠르게 켜졌다가 사라지는 것을 볼 수 있다.
+<br>
+`steam-downgrader-main`의 `src/util` 폴더에 압축 파일이 생성된다.
