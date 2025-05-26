@@ -250,3 +250,6 @@ Steam 클라이언트를 구버전으로 롤백하려는 시도는 Steam의 무�
 
 결국 공격자가 노리는 건 항상 시스템의 허점이라기보다는, 사용자의 설정 습관일 수도 있다는 점을 체감하게 됐다. 2단계 인증을 설정하고, 자동 로그인 기능을 끄고, 평소에 출처가 불분명한 실행파일을 실행하지 않는 것만으로도 실질적인 보안 수준이 크게 올라갈 수 있다.
 
+## 5. PoC 데모 영상
+`session_probe.py` 실행 결과
+[![Demo](http://img.youtube.com/vi/hgRTmFVzz_w/0.jpg)](https://youtu.be/hgRTmFVzz_w)
