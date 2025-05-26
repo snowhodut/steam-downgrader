@@ -1,0 +1,32 @@
+--- Session Probe Simulator Summary ---
+
+### SSFN Files ###
+- c:/program files (x86)/steam\ssfn2316257589938440308
+- c:/program files (x86)/steam\ssfn45221453585958369
+
+### loginusers.vdf ###
+- SteamID64_from_VDF: 76561199144817058
+- AccountName: ajaxtartaglia
+- PersonaName: Kirby
+- RememberPassword: 1
+- WantsOfflineMode: 0
+- AllowAutoLogin: 1
+- loginusers.vdf 파일을 성공적으로 수집했습니다.
+
+### Steam config Folder Files ###
+- c:/program files (x86)/steam\config\config.vdf
+- c:/program files (x86)/steam\config\coplay_76561199166757988.vdf
+- c:/program files (x86)/steam\config\DialogConfig.vdf
+- c:/program files (x86)/steam\config\DialogConfigOverlay_1280x720.vdf
+- c:/program files (x86)/steam\config\DialogConfigOverlay_1280x800.vdf
+- c:/program files (x86)/steam\config\DialogConfigOverlay_1440x960.vdf
+- c:/program files (x86)/steam\config\DialogConfigOverlay_1707x1067.vdf
+- c:/program files (x86)/steam\config\DialogConfigOverlay_3440x1440.vdf
+- c:/program files (x86)/steam\config\libraryfolders.vdf
+- c:/program files (x86)/steam\config\remoteclients.vdf
+- c:/program files (x86)/steam\config\steamapps.vrmanifest
+- c:/program files (x86)/steam\config\virtualgamepadinfo.txt
+
+### Browser Cookies (steamLoginSecure) ###
+- Chrome_Profile 1: Host='store.steampowered.com', Path='/', Encrypted_Value_Length=599 bytes
+
