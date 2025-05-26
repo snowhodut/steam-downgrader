@@ -56,7 +56,13 @@ def enable_persistence(script_path, key_name="SessionProbeSimulator"):
         if python_exec.lower().endswith('python.exe'):
             python_exec = python_exec.replace('python.exe', 'pythonw.exe')
         
-        command = f'"{python_exec}" "{script_path}" --run --silent' 
+        # --- 이 부분을 수정합니다 ---
+        # 기존: command = f'"{python_exec}" "{script_path}" --run --silent' 
+        # 변경: 스크립트가 실행되기 전에 해당 스크립트의 디렉토리로 CWD를 변경하도록 합니다.
+        # cmd /c: 명령 프롬프트를 통해 명령을 실행
+        # cd /d "{os.path.dirname(script_path)}": 스크립트 파일이 있는 디렉토리로 이동 (드라이브 변경도 가능)
+        # &&: 앞선 명령이 성공하면 다음 명령을 실행
+        command = f'cmd /c "cd /d "{os.path.dirname(script_path)}" && "{python_exec}" "{script_path}" --run --silent"' 
         
         winreg.SetValueEx(key, key_name, 0, winreg.REG_SZ, command)
         winreg.CloseKey(key)
