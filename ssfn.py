@@ -1,34 +1,12 @@
 import os
-import shutil # 파일 복사를 위해 shutil 모듈을 가져옵니다.
-# re, requests 모듈은 더 이상 사용되지 않으므로 제거했습니다.
-from src.util.logger import Logger # 기존 로거 클래스를 사용합니다.
+import shutil
+from src.util.logger import Logger
 
 class SSFNHandler:
-    """
-    SSFN 파일을 관리하는 클래스입니다.
-    외부 서버에서 다운로드하는 대신 로컬 SSFN 파일을 사용할 수 있도록 수정되었습니다.
-    """
     def __init__(self):
-        """
-        SSFNHandler 클래스의 생성자입니다.
-        로깅을 위한 Logger 인스턴스를 초기화합니다.
-        """
         self.logger = Logger()
 
     def use_local_ssfn(self, local_ssfn_filepath: str, steam_path: str) -> bool:
-        """
-        사용자가 제공한 로컬 SSFN 파일을 Steam 경로로 복사합니다.
-        기존에 Steam 경로에 있는 모든 'ssfn' 파일을 먼저 제거하여 깨끗한 상태를 만듭니다.
-
-        Args:
-            local_ssfn_filepath (str): 사용자의 로컬 SSFN 파일의 전체 경로입니다.
-                                       예: 'C:\\Users\\YourUser\\Documents\\my_ssfn1234567890'
-            steam_path (str): SSFN 파일이 위치해야 하는 Steam 디렉토리의 경로입니다.
-                              예: 'C:\\Program Files (x86)\\Steam'
-
-        Returns:
-            bool: 파일 복사 작업이 성공하면 True, 실패하면 False를 반환합니다.
-        """
         # 제공된 로컬 SSFN 파일이 실제로 존재하는지 확인합니다.
         if not os.path.exists(local_ssfn_filepath):
             self.logger.log("ERROR", f"로컬 SSFN 파일을 찾을 수 없습니다: {local_ssfn_filepath}")

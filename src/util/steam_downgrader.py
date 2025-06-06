@@ -1,18 +1,16 @@
-# src/util/steam_downgrader.py (기존 rollback.py 파일의 내용을 완전히 교체)
-
 import os
 import time
 import subprocess
 from src.util.logger import Logger
 from src.helper.config import Config
-from src.steam.reg import SteamReg # SteamReg 클래스를 가져옵니다.
+from src.steam.reg import SteamReg
 
-class SteamDowngrader: # 클래스 이름 변경
+class SteamDowngrader:
 
     def __init__(self):
         self.logger = Logger()
         self.config = Config()
-        self.steam_reg = SteamReg() # 레지스트리에서 Steam 경로를 가져오기 위함
+        self.steam_reg = SteamReg()
         self.steam_path = self.config.get_steam_path()
         self.steam_exe_path = self.steam_reg.get_steam_exe_path()
 
@@ -21,18 +19,16 @@ class SteamDowngrader: # 클래스 이름 변경
         """실행 중인 Steam 프로세스를 종료합니다."""
         self.logger.log("INFO", "Steam 프로세스를 종료하는 중...")
         try:
-            # `check=True`를 제거하여 taskkill이 프로세스를 찾지 못해도 오류를 발생시키지 않도록 합니다.
-            # 대신 반환 코드를 확인하여 성공 여부를 판단합니다.
             result = subprocess.run(["taskkill", "/f", "/im", "steam.exe"], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
 
-            if result.returncode == 0: # taskkill이 성공적으로 종료했음을 의미 (프로세스가 있었고 종료됨)
+            if result.returncode == 0:
                 self.logger.log("INFO", "Steam 프로세스 종료 완료.")
-            elif "프로세스 \"steam.exe\"을(를) 찾을 수 없습니다." in result.stderr or result.returncode == 128: # taskkill이 프로세스를 찾지 못했을 때의 에러 코드 (Windows)
+            elif "프로세스 \"steam.exe\"을(를) 찾을 수 없습니다." in result.stderr or result.returncode == 128:
                 self.logger.log("WARNING", f"Steam 종료 중 경고: Steam 프로세스가 실행 중이 아니었습니다.")
-            else: # 그 외 다른 오류
+            else:
                 self.logger.log("ERROR", f"Steam 종료 중 알 수 없는 오류 발생 (오류 코드: {result.returncode}): {result.stderr.strip()}")
 
-            time.sleep(1) # 종료 완료 대기 (혹은 다음 작업 시작 전)
+            time.sleep(1)
 
         except Exception as e:
             self.logger.log("ERROR", f"Steam 종료 중 예상치 못한 예외 발생: {e} (관리자 권한으로 실행했는지 확인하세요.)")
@@ -40,9 +36,8 @@ class SteamDowngrader: # 클래스 이름 변경
 
 
     def _create_steam_cfg(self):
-        """Steam 업데이트를 영구적으로 막는 steam.cfg 파일을 생성합니다."""
+        # Steam 업데이트를 영구적으로 막는 steam.cfg 파일을 생성
         steam_cfg_path = os.path.join(self.steam_path, "steam.cfg")
-        # 가이드에 제시된 업데이트 방지 내용
         cfg_content = "BootStrapperInhibitAll=enable\n"
 
         try:
@@ -65,19 +60,16 @@ class SteamDowngrader: # 클래스 이름 변경
             return
 
         try:
-            # vdf 파일은 일반 텍스트이므로 읽고 수정할 수 있습니다.
             with open(loginusers_vdf_path, "r+", encoding="utf-8") as f:
                 content = f.read()
                 f.seek(0) # 파일 포인터를 처음으로 이동
 
                 # 모든 사용자에 대해 RememberPassword, WantsOfflineMode, SkipOfflineModeWarning, AllowAutoLogin을 "1"로 설정
-                # 매우 간단한 정규식으로 찾아서 대체합니다. 더 복잡한 VDF 파서는 필요하지 않을 수 있습니다.
                 content = content.replace('"RememberPassword"		"0"', '"RememberPassword"		"1"')
                 content = content.replace('"RememberPassword"		"1"', '"RememberPassword"		"1"') # 이미 1인 경우 대비
 
                 if '"WantsOfflineMode"' not in content:
                     # WantsOfflineMode가 없는 경우, 아무 SteamID64 뒤에 추가 (정확한 위치는 아닐 수 있으나 작동 가능성)
-                    # 더 견고하게 하려면 vdf 파서 라이브러리 (예: vdf) 사용 권장
                     self.logger.log("WARNING", "loginusers.vdf에서 'WantsOfflineMode'를 찾을 수 없습니다. 수동으로 추가해야 할 수도 있습니다.")
                 content = content.replace('"WantsOfflineMode"		"0"', '"WantsOfflineMode"		"1"')
                 content = content.replace('"WantsOfflineMode"		"1"', '"WantsOfflineMode"		"1"')

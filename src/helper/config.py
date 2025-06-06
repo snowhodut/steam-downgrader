@@ -32,10 +32,8 @@ class Config():
                 if not self.steam_path or not os.path.isdir(self.steam_path):
                     raise ValueError("config.yaml에서도 유효한 Steam 경로를 찾을 수 없습니다. 경로를 설정해주세요.")
 
-            # --- 이 줄을 추가하세요! ---
             self.downgrade_wayback_date: str = self.config["downgrade_wayback_date"] # config.yaml에서 날짜를 읽어옵니다.
 
-            # 이전 대화에서 삭제하거나 주석 처리했던 불필요한 키들은 그대로 유지하세요.
             # self.rollback_path: str = self.config["rollback_path"]
             # self.rollback_exe_path: str = self.config["rollback_exe_path"]
             # self.github_url: str = self.config["github_url"]
